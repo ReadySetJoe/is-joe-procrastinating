@@ -15,14 +15,16 @@ type SteamResponse = {
 function getStatus(player: SteamPlayer) {
   if (player.gameextrainfo) {
     return {
-      label: `In Game: ${player.gameextrainfo}`,
+      procrastinating: true,
+      label: `Playing ${player.gameextrainfo}`,
       color: "bg-red-500",
     };
   }
-  if (player.personastate >= 1) {
-    return { label: "Online", color: "bg-green-500" };
-  }
-  return { label: "Offline", color: "bg-neutral-500" };
+  return {
+    procrastinating: false,
+    label: player.personastate >= 1 ? "Online but not gaming" : "Offline",
+    color: "bg-neutral-500",
+  };
 }
 
 export default async function Page() {
@@ -61,12 +63,12 @@ export default async function Page() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {player.personaname}
-      </h1>
+      <p className="text-4xl font-bold tracking-tight">
+        {status.procrastinating ? "Yes." : "No."}
+      </p>
       <div className="flex items-center gap-3">
         <span className={`inline-block h-3 w-3 rounded-full ${status.color}`} />
-        <span className="text-lg">{status.label}</span>
+        <span className="text-lg text-neutral-400">{status.label}</span>
       </div>
       <p className="text-sm text-neutral-500">
         Checked {new Date().toISOString().replace("T", " ").slice(0, 19)} UTC
