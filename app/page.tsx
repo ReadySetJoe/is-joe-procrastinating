@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+
 const STEAM_ID = "76561198061090157";
 
 type SteamPlayer = {
@@ -28,6 +30,7 @@ function getStatus(player: SteamPlayer) {
 }
 
 export default async function Page() {
+  await connection();
   const apiKey = process.env.STEAM_API_KEY;
 
   if (!apiKey) {
