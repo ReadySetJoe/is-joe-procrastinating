@@ -42,6 +42,7 @@ export default async function Page() {
     const res = await fetch(
       `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${STEAM_ID}`
     );
+    if (!res.ok) throw new Error(`Steam API returned ${res.status}`);
     const data: SteamResponse = await res.json();
     player = data.response.players[0] ?? null;
   } catch {
@@ -68,7 +69,7 @@ export default async function Page() {
         <span className="text-lg">{status.label}</span>
       </div>
       <p className="text-sm text-neutral-500">
-        Checked {new Date().toLocaleString()}
+        Checked {new Date().toISOString().replace("T", " ").slice(0, 19)} UTC
       </p>
     </main>
   );
