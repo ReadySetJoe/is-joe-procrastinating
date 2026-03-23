@@ -12,7 +12,7 @@ Server-rendered Next.js page. No client-side JavaScript, no database, no state m
 
 A Server Component that:
 
-1. Calls the Steam Web API (`GetPlayerSummaries/v0002`) with Joe's Steam ID
+1. Calls `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={STEAM_API_KEY}&steamids={STEAM_ID}` with Joe's Steam ID
 2. Reads the `personastate` field and `gameextrainfo` field from the response
 3. Renders the result
 
@@ -32,6 +32,8 @@ A Server Component that:
 
 "In Game" takes priority over online status because that's the procrastination signal.
 
+Note: Steam's "Invisible" mode reports `personastate = 0` — the API cannot distinguish invisible from truly offline. This is a Steam limitation, not a bug.
+
 ## UI
 
 - Dark background (`bg-neutral-950` or similar), centered content
@@ -43,8 +45,12 @@ A Server Component that:
 ## Configuration
 
 - **Steam API key**: stored in `.env.local` as `STEAM_API_KEY` (gitignored by default)
-- **Steam ID**: hardcoded constant in `page.tsx` (public info, no security concern)
-- **Caching**: `export const dynamic = 'force-dynamic'` to ensure fresh data on every request
+- **Steam ID**: hardcoded constant in `page.tsx` as `STEAM_ID` (public info, no security concern — replace with Joe's Steam64 ID)
+- **Caching**: Next.js 16 does not cache fetches by default, and an async Server Component calling an external API is already dynamic. No special caching config needed.
+
+### Prerequisite
+
+Joe's Steam profile must be set to **Public**. If set to Friends Only or Private, the API returns `personastate = 0` and omits game info regardless of actual status.
 
 ## Error Handling
 
