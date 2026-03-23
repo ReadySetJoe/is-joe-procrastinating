@@ -42,22 +42,37 @@ export default async function Page() {
   }
 
   let player: SteamPlayer | null = null;
+  let debug = {
+    hasApiKey: !!apiKey,
+    apiKeyLength: apiKey.length,
+    steamId: STEAM_ID,
+    fetchStatus: "",
+    fetchError: "",
+    rawBody: "",
+    playerCount: -1,
+  };
 
   try {
-    const res = await fetch(
-      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${STEAM_ID}`
-    );
+    const url = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${STEAM_ID}`;
+    const res = await fetch(url);
+    debug.fetchStatus = `${res.status} ${res.statusText}`;
+    const text = await res.text();
+    debug.rawBody = text.slice(0, 500);
     if (!res.ok) throw new Error(`Steam API returned ${res.status}`);
-    const data: SteamResponse = await res.json();
+    const data: SteamResponse = JSON.parse(text);
+    debug.playerCount = data.response.players.length;
     player = data.response.players[0] ?? null;
-  } catch {
-    // fall through to error UI
+  } catch (e) {
+    debug.fetchError = e instanceof Error ? e.message : String(e);
   }
 
   if (!player) {
     return (
-      <main className="flex flex-1 items-center justify-center">
+      <main className="flex flex-1 flex-col items-center justify-center gap-4">
         <p className="text-neutral-500">Couldn't check status.</p>
+        <pre className="max-w-lg overflow-auto rounded bg-neutral-900 p-4 text-xs text-neutral-400">
+          {JSON.stringify(debug, null, 2)}
+        </pre>
       </main>
     );
   }
@@ -76,6 +91,9 @@ export default async function Page() {
       <p className="text-sm text-neutral-500">
         Checked {new Date().toISOString().replace("T", " ").slice(0, 19)} UTC
       </p>
+      <pre className="max-w-lg overflow-auto rounded bg-neutral-900 p-4 text-xs text-neutral-400">
+        {JSON.stringify(debug, null, 2)}
+      </pre>
     </main>
   );
 }
